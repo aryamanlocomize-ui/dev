@@ -1,15 +1,132 @@
-# What is this?
+# Service Marketplace Backend (Urban Company-style)
 
-The github.dev web-based editor is a lightweight editing experience that runs entirely in your browser. You can navigate files and source code repositories from GitHub, and make and commit code changes.
+Production-ready backend API for a service marketplace app using **Node.js**, **Express**, **PostgreSQL**, and **MVC architecture**.
 
-There are two ways to go directly to a VS Code environment in your browser and start coding:
+## Tech Stack
 
-* Press the . key on any repository or pull request.
-* Swap `.com` with `.dev` in the URL. For example, this repo https://github.com/github/dev becomes http://github.dev/github/dev
+- Node.js
+- Express.js
+- PostgreSQL (`pg`)
+- JWT authentication
+- BCrypt password hashing
 
-Preview the gif below to get a quick demo of github.dev in action.
+## Project Structure
 
-![github dev](https://user-images.githubusercontent.com/856858/130119109-4769f2d7-9027-4bc4-a38c-10f297499e8f.gif)
+```bash
+.
+├── src
+│   ├── config
+│   ├── controllers
+│   ├── middlewares
+│   ├── models
+│   ├── routes
+│   ├── utils
+│   ├── app.js
+│   └── server.js
+├── sql
+│   └── schema.sql
+├── .env.example
+└── package.json
+```
 
-# Why?
-It’s a quick way to edit and navigate code. It's especially useful if you want to edit multiple files at a time or take advantage of all the powerful code editing features of Visual Studio Code when making a quick change. For more information, see our [documentation](https://github.co/codespaces-editor-help).
+## Setup Instructions
+
+### 1) Install dependencies
+
+```bash
+npm install
+```
+
+### 2) Configure environment variables
+
+```bash
+cp .env.example .env
+```
+
+Update `.env` values as per your local PostgreSQL setup.
+
+### 3) Create PostgreSQL database and tables
+
+```bash
+createdb service_marketplace
+psql -d service_marketplace -f sql/schema.sql
+```
+
+### 4) Run the app
+
+```bash
+npm run dev
+```
+
+Server starts at: `http://localhost:5000`
+
+Health check: `GET /health`
+
+## API Endpoints
+
+### Auth (`/api/auth`)
+
+- `POST /register` - Register user (`customer`/`provider`)
+- `POST /login` - Login and get JWT token
+
+### Services (`/api/services`)
+
+- `GET /` - Get all services
+- `GET /?category=cleaning` - Filter by category
+- `POST /` - Add service (requires `provider` or `admin` JWT)
+
+### Bookings (`/api/bookings`)
+
+- `POST /` - Create booking (authenticated user)
+- `GET /my` - View current user bookings
+- `PATCH /:id/status` - Update booking status (`provider`/`admin`)
+
+## Notes on Production Practices
+
+- Uses modular MVC architecture.
+- Centralized error handling middleware.
+- Async/await everywhere with reusable async wrapper.
+- JWT-based route protection and role-based authorization.
+- Password hashing with bcrypt.
+- SQL constraints + indexes for data integrity and performance.
+
+## Sample Request Payloads
+
+### Register
+
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "Password@123",
+  "role": "customer"
+}
+```
+
+### Login
+
+```json
+{
+  "email": "john@example.com",
+  "password": "Password@123"
+}
+```
+
+### Create Service
+
+```json
+{
+  "name": "Deep Home Cleaning",
+  "category": "cleaning",
+  "price": 1299
+}
+```
+
+### Create Booking
+
+```json
+{
+  "serviceId": 1,
+  "date": "2026-05-01T10:30:00.000Z"
+}
+```
